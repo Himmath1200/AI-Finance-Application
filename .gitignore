@@ -7,8 +7,8 @@
 .pub-cache/
 .pub/
 build/
+!build/web/
 coverage/
-lib/generated_plugin_registrant.dart
 .fvm/
 .fvm/flutter_sdk
 
