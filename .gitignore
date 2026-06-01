@@ -1,0 +1,120 @@
+# .gitignore
+# Flutter
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+coverage/
+lib/generated_plugin_registrant.dart
+.fvm/
+.fvm/flutter_sdk
+
+# iOS/macOS
+ios/.symlinks/
+ios/.generated/
+ios/Flutter/Flutter.podspec
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.xcframework
+ios/Flutter/Generated.xcconfig
+ios/Flutter/ephemeraluser_inputs.xcfilelist
+ios/Flutter/flutter_export_options.plist
+ios/Flutter/flutter_export_options.xcconfig
+ios/Flutter/ios.podfile.lock
+ios/Pods/
+ios/Podfile.lock
+ios/Runner.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
+ios/Runner.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
+*.xcarchive
+
+# Android
+android/.gradle
+android/app/debug
+android/app/profile
+android/app/release
+android/gradle.properties
+android/local.properties
+android/app/google-services.json
+*.jks
+*.keystore
+
+# Web
+web/
+.dart_tool/fsync_test_files/
+
+# General
+*.swp
+*.swo
+*~
+.DS_Store
+.idea/
+.vscode/
+*.iml
+*.iws
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+local.properties
+.gradle
+gradlew
+gradlew.bat
+.ruby-version
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# API Keys (Never commit!)
+firebase_options.dart
+google-services.json
+GoogleService-Info.plist
+
+# Generated files
+*.g.dart
+*.config.dart
+*.freezed.dart
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Dependencies
+node_modules/
+.pub/
+.packages
+pubspec.lock
+
+# IDE
+.idea/
+.vscode/
+*.code-workspace
+*.sublime-project
+*.sublime-workspace
+
+# OS
+Thumbs.db
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*~
+
+# Output
+output/
+dist/
+bin/
