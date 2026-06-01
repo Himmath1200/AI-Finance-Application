@@ -1,10 +1,9 @@
 # Netlify Configuration for Flutter Web Deployment
-# Pre-built Flutter web app - no build command needed
-# The build/web directory is committed to GitHub and served directly
+# Uses pre-built Flutter web files (build/web) - no build needed on Netlify
+# This is faster and more reliable than building Flutter on Netlify
 
 [build]
   publish = "build/web"
-  command = "echo 'Using pre-built Flutter web app'"
 
 # Redirect all routes to index.html for Flutter routing to work
 [[redirects]]
