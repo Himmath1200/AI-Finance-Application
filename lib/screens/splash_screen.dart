@@ -1,9 +1,10 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:ai_finance_platform/providers/index.dart';
 import 'package:ai_finance_platform/utils/index.dart';
+import 'package:ai_finance_platform/widgets/finance_logo.dart';
 
-/// Splash Screen - Shows app logo and checks authentication state
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
 
@@ -13,130 +14,212 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with TickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double> _fadeAnimation;
-  late Animation<double> _scaleAnimation;
+  late AnimationController _entryController;
+  late AnimationController _ringController;
+  late Animation<double> _fadeAnim;
+  late Animation<double> _scaleAnim;
+  late Animation<double> _textFadeAnim;
 
   @override
   void initState() {
     super.initState();
     _setupAnimations();
-    _navigateToNextScreen();
+    _navigateAfterDelay();
   }
 
   void _setupAnimations() {
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 1500),
+    // Logo entry (fade + elastic scale)
+    _entryController = AnimationController(
+      duration: const Duration(milliseconds: 1400),
       vsync: this,
     );
 
-    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
+    _fadeAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _entryController,
+        curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
+      ),
     );
 
-    _scaleAnimation = Tween<double>(begin: 0.5, end: 1).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.elasticOut),
+    _scaleAnim = Tween<double>(begin: 0.55, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _entryController,
+        curve: const Interval(0.0, 0.7, curve: Curves.elasticOut),
+      ),
     );
 
-    _animationController.forward();
+    _textFadeAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _entryController,
+        curve: const Interval(0.5, 1.0, curve: Curves.easeIn),
+      ),
+    );
+
+    // Continuously spinning ring
+    _ringController = AnimationController(
+      duration: const Duration(milliseconds: 1800),
+      vsync: this,
+    )..repeat();
+
+    _entryController.forward();
   }
 
-  void _navigateToNextScreen() {
+  void _navigateAfterDelay() {
     Future.delayed(AppConstants.splashDuration, () {
       if (!mounted) return;
-
       final authProvider = context.read<AuthProvider>();
       if (authProvider.isAuthenticated) {
-        Navigator.of(context).pushReplacementNamed(
-          AppConstants.dashboardRoute,
-        );
+        Navigator.of(context)
+            .pushReplacementNamed(AppConstants.dashboardRoute);
       } else {
-        Navigator.of(context).pushReplacementNamed(
-          AppConstants.loginRoute,
-        );
+        Navigator.of(context).pushReplacementNamed(AppConstants.loginRoute);
       }
     });
   }
 
   @override
   void dispose() {
-    _animationController.dispose();
+    _entryController.dispose();
+    _ringController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFF050D1F),
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
+        // Subtle radial background glow emanating from center
+        decoration: const BoxDecoration(
+          gradient: RadialGradient(
+            center: Alignment.center,
+            radius: 0.9,
             colors: [
-              Color(AppConstants.primaryColor),
-              Color(AppConstants.secondaryColor),
+              Color(0xFF0A1833),
+              Color(0xFF050D1F),
             ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
           ),
         ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ScaleTransition(
-                scale: _scaleAnimation,
-                child: FadeTransition(
-                  opacity: _fadeAnimation,
+        child: SafeArea(
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // ── Logo + animated ring ───────────────────────────────────
+                FadeTransition(
+                  opacity: _fadeAnim,
+                  child: ScaleTransition(
+                    scale: _scaleAnim,
+                    child: AnimatedBuilder(
+                      animation: _ringController,
+                      builder: (context, child) {
+                        return Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            // Static outer glow ring
+                            Container(
+                              width: 178,
+                              height: 178,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: const Color(0xFF2979FF)
+                                      .withOpacity(0.15),
+                                  width: 1,
+                                ),
+                              ),
+                            ),
+
+                            // Spinning arc (the "loading line around the logo")
+                            SizedBox(
+                              width: 174,
+                              height: 174,
+                              child: Transform.rotate(
+                                angle:
+                                    _ringController.value * 2 * math.pi,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 3,
+                                  valueColor:
+                                      const AlwaysStoppedAnimation<Color>(
+                                    Color(0xFF2979FF),
+                                  ),
+                                  backgroundColor: const Color(0xFF2979FF)
+                                      .withOpacity(0.08),
+                                  strokeCap: StrokeCap.round,
+                                ),
+                              ),
+                            ),
+
+                            // Gold accent spinning arc (offset phase)
+                            SizedBox(
+                              width: 164,
+                              height: 164,
+                              child: Transform.rotate(
+                                angle: (_ringController.value + 0.5) *
+                                    2 *
+                                    math.pi,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 1.5,
+                                  valueColor:
+                                      const AlwaysStoppedAnimation<Color>(
+                                    Color(0xFFFFD54F),
+                                  ),
+                                  backgroundColor: Colors.transparent,
+                                  strokeCap: StrokeCap.round,
+                                  value: 0.25,
+                                ),
+                              ),
+                            ),
+
+                            // The logo itself
+                            child!,
+                          ],
+                        );
+                      },
+                      child: const FinanceAILogo(size: 120),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 40),
+
+                // ── App name & tagline ─────────────────────────────────────
+                FadeTransition(
+                  opacity: _textFadeAnim,
                   child: Column(
                     children: [
-                      Container(
-                        width: 100,
-                        height: 100,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(24),
-                        ),
-                        child: const Icon(
-                          Icons.trending_up,
-                          size: 60,
-                          color: Colors.white,
+                      ShaderMask(
+                        shaderCallback: (bounds) => const LinearGradient(
+                          colors: [
+                            Color(0xFF82B1FF),
+                            Color(0xFFFFFFFF),
+                            Color(0xFF82B1FF),
+                          ],
+                        ).createShader(bounds),
+                        child: const Text(
+                          'FINANCE AI',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 34,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 8,
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 10),
                       const Text(
-                        AppConstants.appName,
+                        'Smart Financial Intelligence',
                         style: TextStyle(
-                          fontSize: AppConstants.fontSizeHeading,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: Color(0xFF8BA3C9),
+                          fontSize: 14,
+                          letterSpacing: 2.5,
                         ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'Smart Financial Planning',
-                        style: TextStyle(
-                          fontSize: AppConstants.fontSizeXLarge,
-                          color: Colors.white70,
-                        ),
-                        textAlign: TextAlign.center,
                       ),
                     ],
                   ),
                 ),
-              ),
-              const SizedBox(height: 60),
-              FadeTransition(
-                opacity: _fadeAnimation,
-                child: const SizedBox(
-                  width: 40,
-                  height: 40,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                  ),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

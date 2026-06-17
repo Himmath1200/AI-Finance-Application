@@ -10,6 +10,7 @@ class DefaultFirebaseOptions {
     appId: '1:180571091647:web:2c0b0b0b0b0b0b0b',
     messagingSenderId: '180571091647',
     projectId: 'ai-finance-platform-24808',
+    databaseURL: 'https://ai-finance-platform-24808-default-rtdb.firebaseio.com',
   );
 
   static const android = FirebaseOptions(
@@ -17,6 +18,7 @@ class DefaultFirebaseOptions {
     appId: '1:180571091647:android:210b83b2552c084b874c0a',
     messagingSenderId: '180571091647',
     projectId: 'ai-finance-platform-24808',
+    databaseURL: 'https://ai-finance-platform-24808-default-rtdb.firebaseio.com',
   );
 
   static const ios = FirebaseOptions(
@@ -24,6 +26,7 @@ class DefaultFirebaseOptions {
     appId: '1:180571091647:ios:2c0b0b0b0b0b0b0b',
     messagingSenderId: '180571091647',
     projectId: 'ai-finance-platform-24808',
+    databaseURL: 'https://ai-finance-platform-24808-default-rtdb.firebaseio.com',
   );
 
   static const macos = FirebaseOptions(
@@ -31,6 +34,7 @@ class DefaultFirebaseOptions {
     appId: '1:180571091647:macos:2c0b0b0b0b0b0b0b',
     messagingSenderId: '180571091647',
     projectId: 'ai-finance-platform-24808',
+    databaseURL: 'https://ai-finance-platform-24808-default-rtdb.firebaseio.com',
   );
 
   static const windows = FirebaseOptions(
@@ -38,6 +42,7 @@ class DefaultFirebaseOptions {
     appId: '1:180571091647:windows:2c0b0b0b0b0b0b0b',
     messagingSenderId: '180571091647',
     projectId: 'ai-finance-platform-24808',
+    databaseURL: 'https://ai-finance-platform-24808-default-rtdb.firebaseio.com',
   );
 
   static FirebaseOptions get currentPlatform {

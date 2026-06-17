@@ -1,50 +1,23 @@
-import 'package:flutter/material.dart';
-import 'package:ai_finance_platform/models/index.dart';
-import 'package:ai_finance_platform/services/index.dart';
-import 'package:ai_finance_platform/agents/index.dart';
-import 'package:uuid/uuid.dart';
+import 'package:flutter/foundation.dart';
+import 'package:ai_finance_platform/services/firebase_service.dart';
+import 'package:ai_finance_platform/models/finance_data_model.dart';
+import 'dart:developer' as developer;
 
-/// Finance Provider for managing financial data and calculations
 class FinanceProvider with ChangeNotifier {
-  final FirestoreService _firestoreService = FirestoreService();
-  final AIService _aiService = AIService();
-
+  final _dbService = RealtimeDatabaseService();
   FinanceData? _currentFinanceData;
   String? _aiRecommendation;
-  List<InvestmentSuggestion> _investmentSuggestions = [];
-  bool _isLoading = false;
   String? _errorMessage;
+  bool _isLoading = false;
 
-  // Agents
-  final _expenseAnalysisAgent = ExpenseAnalysisAgent();
-  final _riskAssessmentAgent = RiskAssessmentAgent();
-  final _investmentSuggestionAgent = InvestmentSuggestionAgent();
-  final _goalSavingsPlannerAgent = GoalSavingsPlannerAgent();
-
+  // Getters
   FinanceData? get currentFinanceData => _currentFinanceData;
   String? get aiRecommendation => _aiRecommendation;
-  List<InvestmentSuggestion> get investmentSuggestions => _investmentSuggestions;
-  bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+  bool get isLoading => _isLoading;
+  List<FinanceData> get transactions => _currentFinanceData != null ? [_currentFinanceData!] : [];
 
-  /// Load finance data for user
-  Future<void> loadFinanceData(String uid) async {
-    try {
-      _isLoading = true;
-      notifyListeners();
-
-      _currentFinanceData = await _firestoreService.getLatestFinanceData(uid);
-
-      _isLoading = false;
-      notifyListeners();
-    } catch (e) {
-      _isLoading = false;
-      _errorMessage = e.toString();
-      notifyListeners();
-    }
-  }
-
-  /// Save new finance data
+  /// Save Finance Data
   Future<bool> saveFinanceData({
     required String uid,
     required double income,
@@ -56,10 +29,11 @@ class FinanceProvider with ChangeNotifier {
   }) async {
     try {
       _isLoading = true;
+      _errorMessage = null;
       notifyListeners();
 
       final financeData = FinanceData(
-        id: const Uuid().v4(),
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
         uid: uid,
         income: income,
         expenses: expenses,
@@ -68,97 +42,153 @@ class FinanceProvider with ChangeNotifier {
         months: months,
         riskLevel: riskLevel,
         createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
       );
 
-      await _firestoreService.saveFinanceData(financeData);
+      await _dbService.saveFinanceData(financeData);
       _currentFinanceData = financeData;
-
+      
+      developer.log('Finance data saved successfully!');
       _isLoading = false;
       notifyListeners();
       return true;
     } catch (e) {
-      _isLoading = false;
       _errorMessage = e.toString();
+      developer.log('Save error: $_errorMessage');
+      _isLoading = false;
       notifyListeners();
       return false;
     }
   }
 
-  /// Generate AI recommendation
-  Future<void> generateAIRecommendation() async {
-    if (_currentFinanceData == null) return;
-
+  /// Load Finance Data
+  Future<void> loadFinanceData(String uid) async {
     try {
       _isLoading = true;
+      _errorMessage = null;
       notifyListeners();
 
-      _aiRecommendation = await _aiService.generateFinancialRecommendation(
-        income: _currentFinanceData!.income,
-        expenses: _currentFinanceData!.expenses,
-        age: _currentFinanceData!.age,
-        riskLevel: _currentFinanceData!.riskLevel,
-        savingsGoal: _currentFinanceData!.goalAmount,
-      );
-
+      final data = await _dbService.getLatestFinanceData(uid);
+      if (data != null) {
+        _currentFinanceData = data;
+        developer.log('Finance data loaded successfully!');
+      } else {
+        _errorMessage = 'No financial data found';
+        developer.log('No financial data found');
+      }
+      
       _isLoading = false;
       notifyListeners();
     } catch (e) {
-      _isLoading = false;
       _errorMessage = e.toString();
+      developer.log('Load error: $_errorMessage');
+      _isLoading = false;
       notifyListeners();
     }
   }
 
-  /// Get expense analysis
-  Map<String, dynamic> getExpenseAnalysis() {
-    if (_currentFinanceData == null) return {};
-    return _expenseAnalysisAgent.analyzeExpenses(_currentFinanceData!);
-  }
-
-  /// Get risk profile
-  Map<String, dynamic> getRiskProfile() {
-    if (_currentFinanceData == null) return {};
-    return _riskAssessmentAgent.getRiskProfile(_currentFinanceData!);
-  }
-
-  /// Get investment suggestions
-  Future<void> getInvestmentSuggestions() async {
-    if (_currentFinanceData == null) return;
-
+  /// Generate AI Recommendation based on financial data
+  Future<void> generateAIRecommendation() async {
     try {
-      _investmentSuggestions = _investmentSuggestionAgent.suggestInvestments(
-        _currentFinanceData!.riskLevel,
-        _currentFinanceData!.income - _currentFinanceData!.expenses,
-      );
+      if (_currentFinanceData == null) {
+        _errorMessage = 'No financial data to analyze';
+        notifyListeners();
+        return;
+      }
 
+      _isLoading = true;
+      _errorMessage = null;
+      notifyListeners();
+
+      final data = _currentFinanceData!;
+      
+      // Generate recommendation based on financial metrics
+      String recommendation = 'Recommendations:\n\n';
+      
+      if (data.expenseRatio > 80) {
+        recommendation += '⚠️ High Spending Alert: Your expenses are ${data.expenseRatio.toStringAsFixed(1)}% of income\n';
+      } else if (data.expenseRatio > 50) {
+        recommendation += '⚡ Moderate Spending: Consider optimizing your expenses\n';
+      } else {
+        recommendation += '✅ Healthy spending ratio: ${data.expenseRatio.toStringAsFixed(1)}%\n';
+      }
+
+      recommendation += '\n💰 Monthly Savings Target: ₹${data.monthlySavings.toStringAsFixed(2)}\n';
+      recommendation += '\n📊 Savings Ratio: ${data.savingsRatio.toStringAsFixed(1)}%';
+
+      if (data.riskLevel == 'High') {
+        recommendation += '\n\n⚡ Risk Level: High - Consider diversified investments';
+      } else if (data.riskLevel == 'Medium') {
+        recommendation += '\n\n⚠️ Risk Level: Medium - Balanced investment approach recommended';
+      } else {
+        recommendation += '\n\n🛡️ Risk Level: Low - Conservative investment strategy';
+      }
+
+      _aiRecommendation = recommendation;
+      _isLoading = false;
       notifyListeners();
     } catch (e) {
       _errorMessage = e.toString();
+      developer.log('AI recommendation error: $_errorMessage');
+      _isLoading = false;
       notifyListeners();
     }
   }
 
-  /// Get savings plan
-  Map<String, dynamic> getSavingsPlan() {
-    if (_currentFinanceData == null) return {};
-    return _goalSavingsPlannerAgent.planSavings(_currentFinanceData!);
+  /// Get Expense Analysis from current finance data
+  Map<String, dynamic> getExpenseAnalysis() {
+    if (_currentFinanceData == null) {
+      return {
+        'totalExpense': 0.0,
+        'expenseRatio': 0.0,
+        'savingsRatio': 0.0,
+        'analysis': '',
+      };
+    }
+
+    final data = _currentFinanceData!;
+    final remaining = data.income - data.expenses;
+    String status;
+    String advice;
+    if (data.isHighSpending) {
+      status = '⚠️ High Spending';
+      advice =
+          'Your expenses are ${data.expenseRatio.toStringAsFixed(1)}% of income. Consider cutting non-essential costs immediately.';
+    } else if (data.isModerateSpending) {
+      status = '⚡ Moderate Spending';
+      advice =
+          'Expenses are ${data.expenseRatio.toStringAsFixed(1)}% of income. You have room to save more — target under 50%.';
+    } else {
+      status = '✅ Healthy Spending';
+      advice =
+          'Great! Only ${data.expenseRatio.toStringAsFixed(1)}% of income goes to expenses. Keep investing the surplus.';
+    }
+
+    return {
+      'totalExpense': data.expenses,
+      'expenseRatio': data.expenseRatio,
+      'savingsRatio': data.savingsRatio,
+      'monthSavings': data.monthlySavings,
+      'isHighSpending': data.isHighSpending,
+      'isModerateSpending': data.isModerateSpending,
+      'remaining': remaining,
+      'status': status,
+      'advice': advice,
+      'analysis':
+          '$status\n\n$advice\n\nAvailable for saving: ₹${remaining.toStringAsFixed(2)}/month',
+    };
   }
 
-  /// Get milestones
-  List<Map<String, dynamic>> getMilestones() {
-    if (_currentFinanceData == null) return [];
-    return _goalSavingsPlannerAgent.getMilestones(_currentFinanceData!);
-  }
-
-  /// Get savings breakdown by category
-  Map<String, double> getSavingsBreakdown() {
-    if (_currentFinanceData == null) return {};
-    final monthlySavings = _currentFinanceData!.monthlySavings;
-    return _goalSavingsPlannerAgent.getSavingsByCategory(monthlySavings);
-  }
-
-  /// Clear error
+  /// Clear error message
   void clearError() {
+    _errorMessage = null;
+    notifyListeners();
+  }
+
+  /// Clear all data
+  void clearFinanceData() {
+    _currentFinanceData = null;
+    _aiRecommendation = null;
     _errorMessage = null;
     notifyListeners();
   }

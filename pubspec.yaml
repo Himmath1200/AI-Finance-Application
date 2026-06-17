@@ -33,9 +33,6 @@ dependencies:
   # Local Storage
   shared_preferences: ^2.2.0
   
-  # Environment variables
-  flutter_dotenv: ^5.1.0
-  
   # JSON serialization
   json_annotation: ^4.8.1
   

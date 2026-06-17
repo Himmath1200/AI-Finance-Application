@@ -16,6 +16,11 @@ class AuthProvider with ChangeNotifier {
   bool get isAuthenticated => _user != null;
   bool get isLoading => _isLoading;
 
+  AuthProvider() {
+    // Restore user from Firebase's persisted auth state on app start
+    _user = _authService.currentUser;
+  }
+
   /// Sign Up
   Future<bool> signUp({
     required String email,

@@ -47,6 +47,16 @@ class AppRouter {
           builder: (_) => const SettingsScreen(),
         );
 
+      case AppConstants.recommendationsRoute:
+        return MaterialPageRoute(
+          builder: (_) => const RecommendationsScreen(),
+        );
+
+      case AppConstants.notificationsRoute:
+        return MaterialPageRoute(
+          builder: (_) => const NotificationsScreen(),
+        );
+
       default:
         return MaterialPageRoute(
           builder: (_) => const SplashScreen(),

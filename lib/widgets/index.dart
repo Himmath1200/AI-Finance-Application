@@ -3,3 +3,4 @@ export 'cards.dart';
 export 'buttons.dart';
 export 'text_fields.dart';
 export 'loaders.dart';
+export 'finance_logo.dart';

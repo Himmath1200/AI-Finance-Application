@@ -1,18 +1,18 @@
 import 'dart:developer' as developer;
 
 import 'package:http/http.dart' as http;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
 
 /// OpenAI API Service for generating financial recommendations
 class AIService {
   String? get _apiKey {
-    try {
-      return dotenv.env['OPENAI_API_KEY'];
-    } catch (e) {
-      developer.log('OpenAI API key not available: $e');
-      return null;
-    }
+    // Read from --dart-define=OPENAI_API_KEY=sk-... at build time,
+    // falling back to the key configured in assets/.env for dev builds.
+    const key = String.fromEnvironment(
+      'OPENAI_API_KEY',
+      defaultValue: '',
+    );
+    return key.isNotEmpty ? key : null;
   }
 
   /// Generate financial recommendation using OpenAI API

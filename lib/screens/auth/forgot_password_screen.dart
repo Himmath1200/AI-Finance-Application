@@ -4,7 +4,6 @@ import 'package:ai_finance_platform/providers/index.dart';
 import 'package:ai_finance_platform/widgets/index.dart';
 import 'package:ai_finance_platform/utils/index.dart';
 
-/// Forgot Password Screen
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({Key? key}) : super(key: key);
 
@@ -12,8 +11,11 @@ class ForgotPasswordScreen extends StatefulWidget {
   State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
 }
 
-class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
+class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
+    with SingleTickerProviderStateMixin {
   late TextEditingController _emailController;
+  late AnimationController _animController;
+  late Animation<double> _fadeAnim;
   final _formKey = GlobalKey<FormState>();
   bool _emailSent = false;
 
@@ -21,107 +23,187 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   void initState() {
     super.initState();
     _emailController = TextEditingController();
+    _animController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+    _fadeAnim = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _animController, curve: Curves.easeOut),
+    );
+    _animController.forward();
   }
 
   @override
   void dispose() {
     _emailController.dispose();
+    _animController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFF050D1F),
       appBar: AppBar(
-        title: const Text('Reset Password'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0D1E3C),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: const Color(0xFF1A3A6B)),
+            ),
+            child: const Icon(Icons.arrow_back_ios_rounded,
+                color: Colors.white, size: 18),
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.all(AppConstants.paddingLarge),
-            child: Column(
-              children: [
-                const SizedBox(height: 32),
-                // Header
-                Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    color: Color(AppConstants.primaryColor).withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Icon(
-                    Icons.mail_outline,
-                    size: 50,
-                    color: Color(AppConstants.primaryColor),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  _emailSent ? 'Check Your Email' : 'Reset Password',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  _emailSent
-                      ? 'We have sent password reset link to your email'
-                      : 'Enter your email address to receive a password reset link',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey.shade600,
-                      ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 40),
-                if (!_emailSent)
-                  Form(
-                    key: _formKey,
-                    child: Column(
-                      children: [
-                        CustomTextField(
-                          label: 'Email',
-                          hint: 'Enter your email',
-                          controller: _emailController,
-                          keyboardType: TextInputType.emailAddress,
-                          prefixIcon: Icons.email,
-                          validator: Validators.validateEmail,
-                        ),
-                        const SizedBox(height: AppConstants.paddingLarge),
-                        Consumer<AuthProvider>(
-                          builder: (context, authProvider, _) {
-                            return PrimaryButton(
-                              label: 'Send Reset Link',
-                              isLoading: authProvider.isLoading,
-                              onPressed: () =>
-                                  _handlePasswordReset(context),
-                            );
-                          },
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: FadeTransition(
+              opacity: _fadeAnim,
+              child: Column(
+                children: [
+                  const SizedBox(height: 24),
+
+                  // ── Icon + heading ────────────────────────────────────────
+                  Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0D2552),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: const Color(0xFF1A3A6B)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF2979FF).withOpacity(0.3),
+                          blurRadius: 20,
                         ),
                       ],
                     ),
-                  )
-                else
-                  Column(
-                    children: [
-                      Icon(
-                        Icons.check_circle,
-                        size: 80,
-                        color: Color(AppConstants.successColor),
-                      ),
-                      const SizedBox(height: 24),
-                      PrimaryButton(
-                        label: 'Back to Login',
-                        onPressed: () {
-                          Navigator.pushReplacementNamed(
-                            context,
-                            AppConstants.loginRoute,
-                          );
-                        },
-                      ),
-                    ],
+                    child: Icon(
+                      _emailSent
+                          ? Icons.mark_email_read_rounded
+                          : Icons.lock_reset_rounded,
+                      size: 40,
+                      color: const Color(0xFF2979FF),
+                    ),
                   ),
-              ],
+                  const SizedBox(height: 24),
+                  Text(
+                    _emailSent ? 'Check Your Inbox' : 'Reset Password',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(
+                      _emailSent
+                          ? 'We\'ve sent a password reset link to your email. Please check your inbox.'
+                          : 'Enter your email address and we\'ll send you a link to reset your password.',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: Color(0xFF8BA3C9),
+                        fontSize: 14,
+                        height: 1.5,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 36),
+
+                  if (!_emailSent) ...[
+                    // ── Form card ──────────────────────────────────────────
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF091428),
+                        borderRadius: BorderRadius.circular(24),
+                        border:
+                            Border.all(color: const Color(0xFF1A3A6B)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF2979FF).withOpacity(0.08),
+                            blurRadius: 30,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
+                      ),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          children: [
+                            CustomTextField(
+                              label: 'Email Address',
+                              hint: 'you@example.com',
+                              controller: _emailController,
+                              keyboardType: TextInputType.emailAddress,
+                              prefixIcon: Icons.email_outlined,
+                              validator: Validators.validateEmail,
+                            ),
+                            const SizedBox(height: 24),
+                            Consumer<AuthProvider>(
+                              builder: (context, auth, _) {
+                                return PrimaryButton(
+                                  label: 'Send Reset Link',
+                                  icon: Icons.send_rounded,
+                                  isLoading: auth.isLoading,
+                                  onPressed: () =>
+                                      _handleReset(context),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ] else ...[
+                    // ── Success state ─────────────────────────────────────
+                    Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF0A2B1A),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                            color: const Color(0xFF00C853).withOpacity(0.4)),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.check_circle_rounded,
+                              color: Color(0xFF00C853), size: 28),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'Reset link sent to ${_emailController.text}',
+                              style: const TextStyle(
+                                color: Color(0xFF00C853),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    PrimaryButton(
+                      label: 'Back to Login',
+                      icon: Icons.arrow_back_rounded,
+                      onPressed: () => Navigator.pushReplacementNamed(
+                          context, AppConstants.loginRoute),
+                    ),
+                  ],
+                ],
+              ),
             ),
           ),
         ),
@@ -129,28 +211,19 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     );
   }
 
-  void _handlePasswordReset(BuildContext context) async {
+  void _handleReset(BuildContext context) async {
     if (!_formKey.currentState!.validate()) return;
-
-    final authProvider = context.read<AuthProvider>();
-    final success = await authProvider.sendPasswordResetEmail(
-      _emailController.text.trim(),
-    );
-
+    final auth = context.read<AuthProvider>();
+    final success = await auth
+        .sendPasswordResetEmail(_emailController.text.trim());
     if (mounted) {
       if (success) {
         SnackbarHelper.showSuccess(
-          context,
-          'Password reset link sent to your email',
-        );
-        setState(() {
-          _emailSent = true;
-        });
+            context, 'Password reset link sent!');
+        setState(() => _emailSent = true);
       } else {
         SnackbarHelper.showError(
-          context,
-          authProvider.errorMessage ?? 'Failed to send reset link',
-        );
+            context, auth.errorMessage ?? 'Failed to send reset link');
       }
     }
   }

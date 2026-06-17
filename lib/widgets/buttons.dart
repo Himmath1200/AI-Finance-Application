@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ai_finance_platform/utils/index.dart';
 
-/// Primary button widget
+/// Gradient primary button with optional neon shadow + icon
 class PrimaryButton extends StatelessWidget {
   final String label;
   final VoidCallback onPressed;
@@ -18,50 +18,80 @@ class PrimaryButton extends StatelessWidget {
     this.isLoading = false,
     this.isDisabled = false,
     this.width,
-    this.height = 56,
+    this.height = 54,
     this.icon,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    final bool inactive = isLoading || isDisabled;
+    return Container(
       width: width ?? double.infinity,
       height: height,
-      child: ElevatedButton(
-        onPressed: isLoading || isDisabled ? null : onPressed,
-        style: ElevatedButton.styleFrom(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppConstants.borderRadiusLarge),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(AppConstants.borderRadiusLarge),
+        gradient: inactive
+            ? const LinearGradient(
+                colors: [Color(0xFF1E2A3A), Color(0xFF1E2A3A)])
+            : const LinearGradient(
+                colors: [Color(0xFF1565C0), Color(0xFF2979FF), Color(0xFF42A5F5)],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+              ),
+        boxShadow: inactive
+            ? []
+            : [
+                BoxShadow(
+                  color: const Color(0xFF2979FF).withOpacity(0.45),
+                  blurRadius: 16,
+                  offset: const Offset(0, 5),
+                ),
+              ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(AppConstants.borderRadiusLarge),
+        child: InkWell(
+          onTap: inactive ? null : onPressed,
+          borderRadius: BorderRadius.circular(AppConstants.borderRadiusLarge),
+          splashColor: Colors.white.withOpacity(0.15),
+          child: Center(
+            child: isLoading
+                ? const SizedBox(
+                    height: 22,
+                    width: 22,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      color: Colors.white,
+                    ),
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (icon != null) ...[
+                        Icon(icon, color: Colors.white, size: 19),
+                        const SizedBox(width: 8),
+                      ],
+                      Text(
+                        label,
+                        style: const TextStyle(
+                          fontSize: AppConstants.fontSizeMedium,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                          letterSpacing: 0.4,
+                        ),
+                      ),
+                    ],
+                  ),
           ),
         ),
-        child: isLoading
-            ? const SizedBox(
-                height: 24,
-                width: 24,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
-            : Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (icon != null) ...[
-                    Icon(icon),
-                    const SizedBox(width: 8),
-                  ],
-                  Text(
-                    label,
-                    style: const TextStyle(
-                      fontSize: AppConstants.fontSizeMedium,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
       ),
     );
   }
 }
 
-/// Secondary button widget
+/// Outlined / secondary button with border glow
 class SecondaryButton extends StatelessWidget {
   final String label;
   final VoidCallback onPressed;
@@ -76,50 +106,62 @@ class SecondaryButton extends StatelessWidget {
     required this.onPressed,
     this.isLoading = false,
     this.width,
-    this.height = 56,
+    this.height = 54,
     this.icon,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    return Container(
       width: width ?? double.infinity,
       height: height,
-      child: OutlinedButton(
-        onPressed: isLoading ? null : onPressed,
-        style: OutlinedButton.styleFrom(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppConstants.borderRadiusLarge),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(AppConstants.borderRadiusLarge),
+        border: Border.all(color: const Color(0xFF2979FF).withOpacity(0.6)),
+        color: const Color(0xFF0D2552).withOpacity(0.4),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(AppConstants.borderRadiusLarge),
+        child: InkWell(
+          onTap: isLoading ? null : onPressed,
+          borderRadius: BorderRadius.circular(AppConstants.borderRadiusLarge),
+          splashColor: const Color(0xFF2979FF).withOpacity(0.12),
+          child: Center(
+            child: isLoading
+                ? const SizedBox(
+                    height: 22,
+                    width: 22,
+                    child: CircularProgressIndicator(strokeWidth: 2.5),
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (icon != null) ...[
+                        Icon(icon,
+                            color: const Color(0xFF2979FF), size: 19),
+                        const SizedBox(width: 8),
+                      ],
+                      Text(
+                        label,
+                        style: const TextStyle(
+                          fontSize: AppConstants.fontSizeMedium,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF82B1FF),
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                    ],
+                  ),
           ),
         ),
-        child: isLoading
-            ? const SizedBox(
-                height: 24,
-                width: 24,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
-            : Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (icon != null) ...[
-                    Icon(icon),
-                    const SizedBox(width: 8),
-                  ],
-                  Text(
-                    label,
-                    style: const TextStyle(
-                      fontSize: AppConstants.fontSizeMedium,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
       ),
     );
   }
 }
 
-/// Text button widget
+/// Text link button
 class TextLinkButton extends StatelessWidget {
   final String label;
   final VoidCallback onPressed;
@@ -141,16 +183,16 @@ class TextLinkButton extends StatelessWidget {
       child: Text(
         label,
         style: TextStyle(
-          color: color,
+          color: color ?? const Color(0xFF2979FF),
           fontSize: fontSize,
-          fontWeight: FontWeight.w500,
+          fontWeight: FontWeight.w600,
         ),
       ),
     );
   }
 }
 
-/// Icon button widget
+/// Circular icon button
 class CustomIconButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onPressed;
@@ -175,12 +217,13 @@ class CustomIconButton extends StatelessWidget {
         width: size,
         height: size,
         decoration: BoxDecoration(
-          color: backgroundColor ?? Colors.grey.shade200,
+          color: backgroundColor ?? const Color(0xFF0D1E3C),
           borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+          border: Border.all(color: const Color(0xFF1A3A6B)),
         ),
         child: Icon(
           icon,
-          color: iconColor,
+          color: iconColor ?? const Color(0xFF82B1FF),
         ),
       ),
     );

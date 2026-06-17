@@ -1,7 +1,7 @@
 /// App constants
 class AppConstants {
   // App info
-  static const String appName = 'AI Finance Platform';
+  static const String appName = 'Finance AI';
   static const String appVersion = '1.0.0';
 
   // Firebase collections
@@ -23,12 +23,17 @@ class AppConstants {
   static const String recommendationsRoute = '/recommendations';
   static const String notificationsRoute = '/notifications';
 
-  // Colors
-  static const int primaryColor = 0xFF6366F1;
-  static const int secondaryColor = 0xFF06B6D4;
-  static const int successColor = 0xFF10B981;
-  static const int errorColor = 0xFFEF4444;
-  static const int warningColor = 0xFFF59E0B;
+  // Colors (dark premium palette)
+  static const int primaryColor = 0xFF2979FF;
+  static const int secondaryColor = 0xFF00E5FF;
+  static const int tertiaryColor = 0xFFFFB300;
+  static const int backgroundDark = 0xFF050D1F;
+  static const int surfaceDark = 0xFF091428;
+  static const int cardDark = 0xFF0D1E3C;
+  static const int borderDark = 0xFF1A3A6B;
+  static const int successColor = 0xFF00C853;
+  static const int errorColor = 0xFFCF6679;
+  static const int warningColor = 0xFFFFB300;
 
   // Durations
   static const Duration splashDuration = Duration(seconds: 3);
@@ -42,10 +47,10 @@ class AppConstants {
   static const double paddingLarge = 24.0;
   static const double paddingXLarge = 32.0;
 
-  static const double borderRadiusSmall = 4.0;
-  static const double borderRadiusMedium = 8.0;
-  static const double borderRadiusLarge = 12.0;
-  static const double borderRadiusXLarge = 16.0;
+  static const double borderRadiusSmall = 6.0;
+  static const double borderRadiusMedium = 12.0;
+  static const double borderRadiusLarge = 16.0;
+  static const double borderRadiusXLarge = 20.0;
 
   // Font sizes
   static const double fontSizeSmall = 12.0;

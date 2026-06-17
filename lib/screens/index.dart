@@ -7,4 +7,5 @@ export 'dashboard/dashboard_screen.dart';
 export 'dashboard/finance_form_screen.dart';
 export 'dashboard/profile_screen.dart';
 export 'dashboard/settings_screen.dart';
-export 'test_firebase_screen.dart';
+export 'dashboard/recommendations_screen.dart';
+export 'dashboard/notifications_screen.dart';

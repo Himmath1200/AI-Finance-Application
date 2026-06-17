@@ -1,18 +1,17 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:developer' as developer;
 
 class StockMarketService {
   final String _baseUrl = 'https://www.alphavantage.co/query';
 
+  // Alpha Vantage API key - override via --dart-define=ALPHA_VANTAGE_API_KEY=...
   String get _apiKey {
-    try {
-      return dotenv.env['ALPHA_VANTAGE_API_KEY'] ?? '';
-    } catch (e) {
-      developer.log('Alpha Vantage API key not available: $e');
-      return '';
-    }
+    const key = String.fromEnvironment(
+      'ALPHA_VANTAGE_API_KEY',
+      defaultValue: 'VE7LULW44WYXFS6C',
+    );
+    return key;
   }
 
   /// Get current stock price
