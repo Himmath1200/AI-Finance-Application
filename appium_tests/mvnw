@@ -1,0 +1,17 @@
+#!/bin/sh
+# Maven Wrapper Script for appium_tests
+# This script downloads and runs Maven if it is not already installed.
+
+MAVEN_VERSION="3.9.6"
+MAVEN_HOME_DIR="$HOME/.m2/wrapper/dists/apache-maven-${MAVEN_VERSION}"
+MAVEN_URL="https://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz"
+
+if [ ! -d "$MAVEN_HOME_DIR" ]; then
+    echo "Downloading Maven ${MAVEN_VERSION}..."
+    mkdir -p "$MAVEN_HOME_DIR"
+    curl -sL "$MAVEN_URL" -o /tmp/maven.tar.gz
+    tar -xzf /tmp/maven.tar.gz -C "$MAVEN_HOME_DIR" --strip-components=1
+    echo "Maven ${MAVEN_VERSION} installed."
+fi
+
+"$MAVEN_HOME_DIR/bin/mvn" "$@"
