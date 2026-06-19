@@ -1,0 +1,46 @@
+name: E2E Selenium Testing & Report Generation
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Setup Java JDK
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+
+    - name: Setup Python (for Local File Serving)
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Start Web App Local Server
+      run: |
+        python -m http.server 8080 --directory build/web &
+        echo "Waiting for local web server to start..."
+        sleep 5
+
+    - name: Run E2E Test Suite
+      run: |
+        mvn clean test -f e2e_tests/pom.xml
+
+    - name: Upload E2E Test Report
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: E2E-Test-Report-XLSX
+        path: |
+          E2E_Test_Report_FinanceAI_*.xlsx
+          e2e_tests/E2E_Test_Report_FinanceAI_*.xlsx

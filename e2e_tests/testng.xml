@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Finance AI E2E Test Suite">
+    <listeners>
+        <listener class-name="com.finance.ai.listeners.ExcelReportListener"/>
+    </listeners>
+    <test name="E2E Functional and Security Validation">
+        <classes>
+            <class name="com.finance.ai.AuthTests"/>
+            <class name="com.finance.ai.DashboardTests"/>
+            <class name="com.finance.ai.SecurityAndVulnerabilityTests"/>
+        </classes>
+    </test>
+</suite>
